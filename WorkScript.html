@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Collections Script Hub</title>
+<style>
+  :root{
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --bg:#f4f6fb;
+    --card:#ffffff;
+    --text:#1e2433;
+    --muted:#6b7280;
+    --border:#e5e9f2;
+    --shadow:0 2px 8px rgba(30,40,80,0.06);
+    --shadow-hover:0 8px 24px rgba(30,40,80,0.12);
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+
+  header{
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    padding:20px 24px;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+
+  .header-inner{
+    max-width:1100px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  h1{
+    margin:0;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+
+  .subtitle{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .search-wrap{
+    position:relative;
+  }
+
+  .search-wrap input{
+    width:100%;
+    padding:12px 16px 12px 42px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-size:15px;
+    background:var(--bg);
+    color:var(--text);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+
+  .search-wrap input:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(37,99,235,0.12);
+    background:var(--card);
+  }
+
+  .search-wrap svg{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:var(--muted);
+    pointer-events:none;
+  }
+
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:24px;
+    padding-bottom:100px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:16px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    display:flex;
+    align-items:center;
+    min-height:84px;
+  }
+
+  .card:hover{
+    transform:translateY(-3px);
+    box-shadow:var(--shadow-hover);
+    border-color:#c7d6fb;
+  }
+
+  .card h3{
+    margin:0;
+    font-size:15px;
+    font-weight:600;
+    line-height:1.4;
+    color:var(--text);
+  }
+
+  .empty-state{
+    text-align:center;
+    color:var(--muted);
+    padding:60px 20px;
+    grid-column:1/-1;
+  }
+
+  /* Floating add button */
+  .fab{
+    position:fixed;
+    bottom:28px;
+    right:28px;
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:16px 24px;
+    font-size:15px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    box-shadow:0 6px 20px rgba(37,99,235,0.35);
+    cursor:pointer;
+    transition:background .15s, transform .15s;
+    z-index:20;
+  }
+
+  .fab:hover{
+    background:var(--blue-dark);
+    transform:translateY(-2px);
+  }
+
+  /* Modal */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(20,25,40,0.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+
+  .overlay.active{
+    display:flex;
+  }
+
+  .modal{
+    background:var(--card);
+    border-radius:var(--radius);
+    width:100%;
+    max-width:600px;
+    max-height:85vh;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 20px 60px rgba(20,25,40,0.25);
+    overflow:hidden;
+  }
+
+  .modal-header{
+    padding:20px 24px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .modal-header h2{
+    margin:0;
+    font-size:17px;
+    font-weight:700;
+  }
+
+  .modal-close{
+    background:none;
+    border:none;
+    font-size:22px;
+    line-height:1;
+    color:var(--muted);
+    cursor:pointer;
+    padding:4px;
+    border-radius:6px;
+  }
+
+  .modal-close:hover{
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  .modal-body{
+    padding:20px 24px;
+    overflow-y:auto;
+    flex:1;
+  }
+
+  .modal-body pre{
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    font-family:inherit;
+    font-size:14px;
+    line-height:1.6;
+    margin:0;
+    color:var(--text);
+  }
+
+  .modal-body input,
+  .modal-body textarea{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--text);
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+
+  .modal-body input:focus,
+  .modal-body textarea:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(37,99,235,0.12);
+  }
+
+  .modal-body textarea{
+    min-height:280px;
+    resize:vertical;
+    line-height:1.6;
+  }
+
+  .field-label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:6px;
+    margin-top:14px;
+  }
+
+  .field-label:first-child{
+    margin-top:0;
+  }
+
+  .modal-footer{
+    padding:16px 24px;
+    border-top:1px solid var(--border);
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:flex-end;
+  }
+
+  .btn{
+    padding:10px 18px;
+    border-radius:10px;
+    border:1px solid transparent;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+
+  .btn-primary{
+    background:var(--blue);
+    color:#fff;
+  }
+  .btn-primary:hover{ background:var(--blue-dark); }
+
+  .btn-secondary{
+    background:var(--bg);
+    color:var(--text);
+    border-color:var(--border);
+  }
+  .btn-secondary:hover{ background:#e9edf6; }
+
+  .btn-danger{
+    background:#fff;
+    color:#dc2626;
+    border-color:#fbd5d5;
+  }
+  .btn-danger:hover{ background:#fef2f2; }
+
+  /* Toasts */
+  .toast-container{
+    position:fixed;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    z-index:100;
+    align-items:center;
+  }
+
+  .toast{
+    background:#1e2433;
+    color:#fff;
+    padding:12px 20px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:500;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+    opacity:0;
+    transform:translateY(10px);
+    animation:toast-in .25s ease forwards, toast-out .25s ease forwards 2.2s;
+  }
+
+  @keyframes toast-in{
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes toast-out{
+    to{ opacity:0; transform:translateY(10px); }
+  }
+
+  @media (max-width:600px){
+    .grid{ grid-template-columns:1fr; }
+    .fab span{ display:none; }
+    .fab{ padding:16px; border-radius:50%; }
+    .modal-footer{ justify-content:stretch; }
+    .modal-footer .btn{ flex:1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Collections Script Hub</h1>
+      <p class="subtitle">Quick access to call and message scripts</p>
+    </div>
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="searchInput" placeholder="Search scripts by title..." />
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid" id="scriptGrid"></div>
+</main>
+
+<button class="fab" id="addBtn">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+  <span>Add Script</span>
+</button>
+
+<!-- View Modal -->
+<div class="overlay" id="viewOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="viewTitle">Title</h2>
+      <button class="modal-close" data-close="viewOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <pre id="viewContent"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="deleteBtn">Delete</button>
+      <button class="btn btn-secondary" id="editBtn">Edit</button>
+      <button class="btn btn-primary" id="copyBtn">Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit/Add Modal -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="editModalTitle">Add Script</h2>
+      <button class="modal-close" data-close="editOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label" for="editTitleInput">Title</label>
+      <input type="text" id="editTitleInput" placeholder="e.g. FIRST NSF - INFINITY LOANS" />
+      <label class="field-label" for="editContentInput">Script content</label>
+      <textarea id="editContentInput" placeholder="Enter the full script text..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="editOverlay">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm modal -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h2>Delete script?</h2>
+      <button class="modal-close" data-close="confirmOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0;color:var(--muted);font-size:14px;">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="confirmOverlay">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  const STORAGE_KEY = 'collectionScripts';
+
+  const defaultScripts = [
+    {
+      title: "FIRST NSF - INFINITY LOANS",
+      content: `Good day,
+
+Our records show that your recent payment was returned due to insufficient funds (NSF). As a result, your account now remains outstanding.
+
+Please note that this is your FIRST NSF on file. Immediate action is required to avoid additional fees, further collection activity, and possible impact on your eligibility for future borrowing.
+
+Available options to send today:
+
+\u2022 $________ \u2013 Includes all applicable NSF fees and the scheduled payment amount
+\u2022 $________ \u2013 Split NSF fee arrangement until the balance is fully paid off
+
+Outstanding Balance: $________
+
+Please send your payment today via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+Any other payment arrangements are subject to approval. Please let us know which option works best for you so we can set it up immediately.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "SECOND NSF - INFINITY LOANS",
+      content: `Good day,
+
+Our records show that your recent payment was returned due to insufficient funds (NSF) for the SECOND NSF. As a result, your account remains outstanding and immediate action is required.
+
+Please note that this is your SECOND NSF on file. Failure to address this matter promptly may result in additional fees, further collection activity, restrictions on future borrowing, and possible escalation of your account for further review.
+
+Available options to send today:
+
+\u2022 $________ \u2013 Includes all applicable NSF fees and the scheduled payment amount
+\u2022 $________ \u2013 Split NSF fee arrangement until the balance is fully paid off
+
+Outstanding Balance: $________
+
+Please send your payment today via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+Any other payment arrangements are subject to approval. Please let us know which option works best for you so we can set it up immediately.
+
+It is important that we hear from you today to prevent further action on your account.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "THIRD NSF - INFINITY LOANS",
+      content: `Good day,
+
+Our records indicate that your recent payments have been returned due to insufficient funds (NSF). As a result, your account remains outstanding and now requires immediate attention.
+
+Please be advised that MULTIPLE DECLINED PAYMENTS have been noted on your account. Failure to address this matter promptly may result in additional fees, further collection activity, restrictions on future borrowing, and possible escalation of your account for further review.
+
+Available options to send today:
+
+\u2022 $________ \u2013 Includes all applicable NSF fees and the scheduled payment amount
+\u2022 $________ \u2013 Split NSF fee arrangement until the balance is fully paid off
+
+Outstanding Balance: $________
+
+Please send your payment today via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+Please let us know which option works best for you so we can set it up immediately. Any other payment arrangements are subject to approval.
+
+It is important that we hear from you today to prevent further action on your account.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "STOP PAYMENT NOTICE - INFINITY LOANS",
+      content: `Good day,
+
+Our records indicate that a stop payment has been placed against your scheduled payments without prior notification to our office. As a result, your account now requires immediate attention.
+
+Please contact us today to confirm whether the stop payment has been removed so that we can determine the appropriate next steps regarding your account. Failure to respond may result in additional collection activity and further review of your account status.
+
+In the absence of communication from you, we will expect payment of the full outstanding balance of $490.64 today. If you are unable to remit the full balance, alternative payment arrangements may be available and are subject to approval.
+
+Please send your payment via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+It is important that we hear from you today to avoid further action on your account.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "BLOCKED PAYMENT NOTICE - INFINITY LOANS",
+      content: `Good day,
+
+Our records indicate that payments to Infinity Loans have been blocked through your banking institution, which has prevented us from processing your scheduled payments under the terms of your signed agreement.
+
+A response is required today to confirm whether the payment block has been removed so we can determine the appropriate next steps regarding your account. Failure to respond or resolve this matter may result in additional fees, further collection activity, and escalation of your account for further review.
+
+As of today, your outstanding balance is $490.64, which remains due immediately.
+
+Please send your payment via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+If the payment block has been removed, please notify our office immediately so we can update your account accordingly.
+
+It is important that we hear from you today to avoid further action on your account.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Irish
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "ACCOUNT CLOSED NOTICE - INFINITY LOAN",
+      content: `Good day,
+
+Our records indicate that the bank account previously used for your scheduled payments has been closed, which has prevented us from processing your payments as agreed.
+
+A response is required today so that we can determine the appropriate next steps regarding your account.
+
+Please be advised that this matter requires immediate attention. Failure to resolve the outstanding balance may result in additional collection activity and escalation of your account for further review.
+
+As of today, your outstanding balance is $289.98, which remains due immediately.
+
+Please send your payment via e-transfer to: collection@infinityloans.ca
+Please include your full name in the message section.
+
+If you have updated banking information or require alternative payment arrangements, please contact our office immediately so we can review the available options.
+
+It is important that we hear from you today to avoid further action on your account.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "DECLINED PAYMENT NOTICE \u2013 INFINITY LOANS",
+      content: `Good day,
+
+We noticed that your recent payment was declined, leaving your account past due. To maintain your account in good standing and preserve your eligibility for future borrowing, please send $207.49 today, which includes the applicable NSF fee.
+
+Alternatively, we can split the NSF fee, allowing you to send $182.49 today and continue with the same payment amount until the remaining balance is fully paid off.
+
+Outstanding Balance: $799.95
+
+Please let us know which option works best for you so we can update your account accordingly and remove your name from collections.
+
+Please send your payment via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "LIMITED-TIME SETTLEMENT OPPORTUNITY \u2013 INFINITY LOANS",
+      content: `Good day,
+
+We are pleased to advise that a reduced settlement amount has been approved to assist you in resolving your outstanding balance.
+
+Approved Settlement Options:
+
+\u2022 $500.00 \u2013 Full settlement amount to close your account in full
+\u2022 $250.00 today and $250.00 on your next payday \u2013 Settlement amount payable in two installments
+
+Please send your payment via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+Please note that this is a limited-time opportunity. Taking advantage of this offer may help you avoid additional collection activity and bring your account to a resolution.
+
+Kindly advise us which settlement option you would like to proceed with so we can update your account accordingly.
+
+We encourage you to respond promptly, as this offer may not remain available indefinitely.
+
+Thank you.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "UNPAID LOAN \u2013 ACCOUNT RESOLUTION OPTIONS",
+      content: `Hello,
+
+Our records indicate that your loan remains unpaid. To help you avoid additional fees and further collection activity, please review the approved options below and select the one that best suits your situation.
+
+Outstanding Balance: $871.12
+
+Available Options:
+
+1. Settle your account for $300.00 \u2013 Resolve your account with a reduced settlement amount and waive applicable NSF fees.
+
+2. Make multiple installment payments of $217.78 \u2013 Continue making payments until the outstanding balance has been satisfied.
+
+3. Renew your loan for $150.00 \u2013 If eligible, you may qualify for a loan renewal option. Additional terms and conditions may apply.
+
+Please send your payment via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+Please respond within 24\u201348 hours to confirm which option you would like to proceed with so we can update your account accordingly and help prevent further collection activity.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "ACCOUNT RECOVERY NOTICE \u2013 INFINITY LOANS",
+      content: `Hello,
+
+To restore your account and maintain your current payment arrangement, immediate action is required. Please send $187.37 today, which includes the applicable NSF fee.
+
+Alternatively, we can split the NSF fee, allowing you to send $182.49 today and continue with the same payment amount until the remaining balance has been fully paid.
+
+Outstanding Balance: $799.95
+
+Please send your payment via e-transfer to: collection@infinityloans.ca
+(Please include your full name in the message section.)
+
+Please let us know which option works best for you so we can update your account accordingly and keep your current payment arrangement in place.
+
+Thank you for your prompt attention to this matter.
+
+Regards,
+
+Jack
+Collections Team
+Infinity Loans
+888-959-4022`
+    },
+    {
+      title: "VOICEMAIL TO CLIENT",
+      content: `Hello, this is Vien calling from Infinity Loans regarding an important matter on your account. Please give us a call back at your earliest convenience at 888-959-4022. Again, our number is 888-959-4022. Thank you.`
+    },
+    {
+      title: "VOICEMAIL TO REFERENCE",
+      content: `Hello, this is Vien from Infinity Loans. This message is intended for (Client Name), who has listed you as a reference. Please ask them to contact us at their earliest convenience at 888-959-4022. Thank you.`
+    }
+  ];
+
+  let scripts = [];
+  let activeId = null; // id of script currently open in view/edit modal
+
+  // ---------- Storage ----------
+  function loadScripts(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      try{
+        scripts = JSON.parse(raw);
+        return;
+      }catch(e){
+        scripts = [];
+      }
+    }
+    // seed with defaults
+    scripts = defaultScripts.map((s, i) => ({
+      id: 'seed-' + i + '-' + Date.now(),
+      title: s.title,
+      content: s.content
+    }));
+    saveScripts();
+  }
+
+  function saveScripts(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+  }
+
+  // ---------- Rendering ----------
+  const grid = document.getElementById('scriptGrid');
+  const searchInput = document.getElementById('searchInput');
+
+  function renderGrid(){
+    const query = searchInput.value.trim().toLowerCase();
+    const filtered = scripts.filter(s => s.title.toLowerCase().includes(query));
+
+    grid.innerHTML = '';
+
+    if(filtered.length === 0){
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.textContent = scripts.length === 0
+        ? 'No scripts yet. Click "+ Add Script" to create one.'
+        : 'No scripts match your search.';
+      grid.appendChild(empty);
+      return;
+    }
+
+    filtered.forEach(script => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.id = script.id;
+
+      const h3 = document.createElement('h3');
+      h3.textContent = script.title;
+
+      card.appendChild(h3);
+      card.addEventListener('click', () => openViewModal(script.id));
+      grid.appendChild(card);
+    });
+  }
+
+  // ---------- Toasts ----------
+  const toastContainer = document.getElementById('toastContainer');
+
+  function showToast(message){
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  }
+
+  // ---------- View Modal ----------
+  const viewOverlay = document.getElementById('viewOverlay');
+  const viewTitle = document.getElementById('viewTitle');
+  const viewContent = document.getElementById('viewContent');
+
+  function openViewModal(id){
+    const script = scripts.find(s => s.id === id);
+    if(!script) return;
+    activeId = id;
+    viewTitle.textContent = script.title;
+    viewContent.textContent = script.content;
+    viewOverlay.classList.add('active');
+  }
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const script = scripts.find(s => s.id === activeId);
+    if(!script) return;
+    navigator.clipboard.writeText(script.content).then(() => {
+      showToast('Script copied');
+    }).catch(() => {
+      // Fallback for environments without clipboard API
+      const textarea = document.createElement('textarea');
+      textarea.value = script.content;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      showToast('Script copied');
+    });
+  });
+
+  document.getElementById('editBtn').addEventListener('click', () => {
+    const script = scripts.find(s => s.id === activeId);
+    if(!script) return;
+    openEditModal(script.id);
+    closeOverlay('viewOverlay');
+  });
+
+  document.getElementById('deleteBtn').addEventListener('click', () => {
+    document.getElementById('confirmOverlay').classList.add('active');
+  });
+
+  // ---------- Edit / Add Modal ----------
+  const editOverlay = document.getElementById('editOverlay');
+  const editModalTitle = document.getElementById('editModalTitle');
+  const editTitleInput = document.getElementById('editTitleInput');
+  const editContentInput = document.getElementById('editContentInput');
+
+  function openEditModal(id){
+    if(id){
+      const script = scripts.find(s => s.id === id);
+      if(!script) return;
+      activeId = id;
+      editModalTitle.textContent = 'Edit Script';
+      editTitleInput.value = script.title;
+      editContentInput.value = script.content;
+    } else {
+      activeId = null;
+      editModalTitle.textContent = 'Add Script';
+      editTitleInput.value = '';
+      editContentInput.value = '';
+    }
+    editOverlay.classList.add('active');
+    setTimeout(() => editTitleInput.focus(), 50);
+  }
+
+  document.getElementById('addBtn').addEventListener('click', () => openEditModal(null));
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const title = editTitleInput.value.trim();
+    const content = editContentInput.value.trim();
+
+    if(!title){
+      editTitleInput.focus();
+      return;
+    }
+
+    if(activeId){
+      // Update existing
+      const script = scripts.find(s => s.id === activeId);
+      if(script){
+        script.title = title;
+        script.content = content;
+        saveScripts();
+        renderGrid();
+        showToast('Script updated');
+      }
+    } else {
+      // Add new
+      const newScript = {
+        id: 'script-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+        title: title,
+        content: content
+      };
+      scripts.push(newScript);
+      saveScripts();
+      renderGrid();
+      showToast('Script saved');
+    }
+
+    closeOverlay('editOverlay');
+    activeId = null;
+  });
+
+  // ---------- Delete Confirm ----------
+  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+    if(activeId){
+      scripts = scripts.filter(s => s.id !== activeId);
+      saveScripts();
+      renderGrid();
+      showToast('Script deleted');
+    }
+    closeOverlay('confirmOverlay');
+    closeOverlay('viewOverlay');
+    activeId = null;
+  });
+
+  // ---------- Overlay close handling ----------
+  function closeOverlay(id){
+    document.getElementById(id).classList.remove('active');
+  }
+
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', () => {
+      closeOverlay(el.dataset.close);
+      if(el.dataset.close === 'editOverlay'){
+        activeId = null;
+      }
+    });
+  });
+
+  document.querySelectorAll('.overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if(e.target === overlay){
+        closeOverlay(overlay.id);
+        if(overlay.id === 'editOverlay'){
+          activeId = null;
+        }
+      }
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape'){
+      document.querySelectorAll('.overlay.active').forEach(o => closeOverlay(o.id));
+    }
+  });
+
+  // ---------- Search ----------
+  searchInput.addEventListener('input', renderGrid);
+
+  // ---------- Init ----------
+  loadScripts();
+  renderGrid();
+</script>
+
+</body>
+</html>
