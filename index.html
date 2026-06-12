@@ -228,6 +228,41 @@
     flex:1;
   }
 
+  .lang-tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+
+  .lang-tab{
+    background:none;
+    border:none;
+    padding:8px 16px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;
+    transition:color .15s, border-color .15s;
+  }
+
+  .lang-tab:hover{
+    color:var(--text);
+  }
+
+  .lang-tab.active{
+    color:var(--blue);
+    border-bottom-color:var(--blue);
+  }
+
+  .lang-empty{
+    color:var(--muted);
+    font-style:italic;
+    font-size:14px;
+  }
+
   .modal-body pre{
     white-space:pre-wrap;
     word-wrap:break-word;
@@ -389,6 +424,10 @@
       <button class="modal-close" data-close="viewOverlay">&times;</button>
     </div>
     <div class="modal-body">
+      <div class="lang-tabs">
+        <button class="lang-tab active" data-lang="en" id="viewTabEn">English</button>
+        <button class="lang-tab" data-lang="fr" id="viewTabFr">French</button>
+      </div>
       <pre id="viewContent"></pre>
     </div>
     <div class="modal-footer">
@@ -409,8 +448,10 @@
     <div class="modal-body">
       <label class="field-label" for="editTitleInput">Title</label>
       <input type="text" id="editTitleInput" placeholder="e.g. FIRST NSF - INFINITY LOANS" />
-      <label class="field-label" for="editContentInput">Script content</label>
-      <textarea id="editContentInput" placeholder="Enter the full script text..."></textarea>
+      <label class="field-label" for="editContentInput">Script content (English)</label>
+      <textarea id="editContentInput" placeholder="Enter the full script text in English..."></textarea>
+      <label class="field-label" for="editContentInputFr">Script content (French)</label>
+      <textarea id="editContentInputFr" placeholder="Enter the full script text in French (optional)..."></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" data-close="editOverlay">Cancel</button>
@@ -465,11 +506,11 @@ Any other payment arrangements are subject to approval. Please let us know which
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "SECOND NSF - INFINITY LOANS",
@@ -496,11 +537,11 @@ It is important that we hear from you today to prevent further action on your ac
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "THIRD NSF - INFINITY LOANS",
@@ -527,11 +568,11 @@ It is important that we hear from you today to prevent further action on your ac
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "STOP PAYMENT NOTICE - INFINITY LOANS",
@@ -551,11 +592,11 @@ It is important that we hear from you today to avoid further action on your acco
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "BLOCKED PAYMENT NOTICE - INFINITY LOANS",
@@ -577,11 +618,11 @@ It is important that we hear from you today to avoid further action on your acco
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Irish
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "ACCOUNT CLOSED NOTICE - INFINITY LOAN",
@@ -605,11 +646,11 @@ It is important that we hear from you today to avoid further action on your acco
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "DECLINED PAYMENT NOTICE \u2013 INFINITY LOANS",
@@ -629,11 +670,11 @@ Please send your payment via e-transfer to: collection@infinityloans.ca
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "LIMITED-TIME SETTLEMENT OPPORTUNITY \u2013 INFINITY LOANS",
@@ -645,6 +686,8 @@ Approved Settlement Options:
 
 \u2022 $500.00 \u2013 Full settlement amount to close your account in full
 \u2022 $250.00 today and $250.00 on your next payday \u2013 Settlement amount payable in two installments
+
+Your outstanding balance is: $
 
 Please send your payment via e-transfer to: collection@infinityloans.ca
 (Please include your full name in the message section.)
@@ -658,11 +701,11 @@ We encourage you to respond promptly, as this offer may not remain available ind
 Thank you.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "UNPAID LOAN \u2013 ACCOUNT RESOLUTION OPTIONS",
@@ -688,48 +731,58 @@ Please respond within 24\u201348 hours to confirm which option you would like to
 Thank you for your prompt attention to this matter.
 
 Regards,
-
-Jack
+Vien
 Collections Team
 Infinity Loans
-888-959-4022`
-    },
-    {
-      title: "ACCOUNT RECOVERY NOTICE \u2013 INFINITY LOANS",
-      content: `Hello,
-
-To restore your account and maintain your current payment arrangement, immediate action is required. Please send $187.37 today, which includes the applicable NSF fee.
-
-Alternatively, we can split the NSF fee, allowing you to send $182.49 today and continue with the same payment amount until the remaining balance has been fully paid.
-
-Outstanding Balance: $799.95
-
-Please send your payment via e-transfer to: collection@infinityloans.ca
-(Please include your full name in the message section.)
-
-Please let us know which option works best for you so we can update your account accordingly and keep your current payment arrangement in place.
-
-Thank you for your prompt attention to this matter.
-
-Regards,
-
-Jack
-Collections Team
-Infinity Loans
-888-959-4022`
+888-999-4491`,
+      contentFr: ''
     },
     {
       title: "VOICEMAIL TO CLIENT",
-      content: `Hello, this is Vien calling from Infinity Loans regarding an important matter on your account. Please give us a call back at your earliest convenience at 888-959-4022. Again, our number is 888-959-4022. Thank you.`
+      content: `Hello, this is Vien calling from Infinity Loans regarding an important matter on your account. Please give us a call back at your earliest convenience at 888-999-4491. Again, our number is 888-999-4491. Thank you.`,
+      contentFr: ''
     },
     {
       title: "VOICEMAIL TO REFERENCE",
-      content: `Hello, this is Vien from Infinity Loans. This message is intended for (Client Name), who has listed you as a reference. Please ask them to contact us at their earliest convenience at 888-959-4022. Thank you.`
+      content: `Hello, this is Vien from Infinity Loans. This message is intended for (Client Name), who has listed you as a reference. Please ask them to contact us at their earliest convenience at 888-999-4491. Thank you.`,
+      contentFr: ''
+    },
+    {
+      title: "VOICEMAIL TO REFERENCE WORK",
+      content: `Hello this is Vien can I talk to (client name) and if wala
+
+can I leave a message can you inform (client name) to call back at your earliest convenience at 888-999-4491. Again, our number is 888-999-4491. Thank you.`,
+      contentFr: ''
+    },
+    {
+      title: "NEGO WITH CLIENT",
+      content: `Introduce - this is Vien from Infinity Loans
+Confirm name - is this (client's name)
+I'm calling regarding your declined payments with us, your last payment was (date), we have some options available for you.
+*offer settlement amount or other arrangement from your email`,
+      contentFr: ''
+    },
+    {
+      title: "Payment Confirmation Request",
+      content: `Good day,
+
+Your payment processed, (date). Can you please confirm if the payment went through as planned?
+
+Kindly confirm so we can update your account accordingly and remove your name from collections.
+
+Thank you.
+
+Regards,
+Vien
+Infinity Loan
+(888) 999-4491`,
+      contentFr: ''
     }
   ];
 
   let scripts = [];
   let activeId = null; // id of script currently open in view/edit modal
+  let activeLang = 'en'; // language tab currently shown in view modal
 
   // ---------- Storage ----------
   function loadScripts(){
@@ -746,7 +799,8 @@ Infinity Loans
     scripts = defaultScripts.map((s, i) => ({
       id: 'seed-' + i + '-' + Date.now(),
       title: s.title,
-      content: s.content
+      content: s.content,
+      contentFr: ''
     }));
     saveScripts();
   }
@@ -804,25 +858,72 @@ Infinity Loans
   const viewOverlay = document.getElementById('viewOverlay');
   const viewTitle = document.getElementById('viewTitle');
   const viewContent = document.getElementById('viewContent');
+  const viewTabEn = document.getElementById('viewTabEn');
+  const viewTabFr = document.getElementById('viewTabFr');
+
+  function renderViewContent(){
+    const script = scripts.find(s => s.id === activeId);
+    if(!script) return;
+
+    viewTabEn.classList.toggle('active', activeLang === 'en');
+    viewTabFr.classList.toggle('active', activeLang === 'fr');
+
+    if(activeLang === 'en'){
+      viewContent.textContent = script.content || '';
+      viewContent.classList.remove('lang-empty');
+    } else {
+      const fr = script.contentFr || '';
+      if(fr.trim()){
+        viewContent.textContent = fr;
+        viewContent.classList.remove('lang-empty');
+      } else {
+        viewContent.textContent = 'No French version yet. Click Edit to add one.';
+        viewContent.classList.add('lang-empty');
+      }
+    }
+  }
 
   function openViewModal(id){
     const script = scripts.find(s => s.id === id);
     if(!script) return;
     activeId = id;
+    activeLang = 'en';
     viewTitle.textContent = script.title;
-    viewContent.textContent = script.content;
+    renderViewContent();
     viewOverlay.classList.add('active');
   }
+
+  viewTabEn.addEventListener('click', () => {
+    activeLang = 'en';
+    renderViewContent();
+  });
+
+  viewTabFr.addEventListener('click', () => {
+    activeLang = 'fr';
+    renderViewContent();
+  });
 
   document.getElementById('copyBtn').addEventListener('click', () => {
     const script = scripts.find(s => s.id === activeId);
     if(!script) return;
-    navigator.clipboard.writeText(script.content).then(() => {
+
+    let textToCopy;
+    if(activeLang === 'fr'){
+      textToCopy = (script.contentFr || '').trim();
+      if(!textToCopy){
+        showToast('No French version to copy');
+        return;
+      }
+    } else {
+      textToCopy = script.content || '';
+    }
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
       showToast('Script copied');
     }).catch(() => {
       // Fallback for environments without clipboard API
       const textarea = document.createElement('textarea');
-      textarea.value = script.content;
+      textarea.value = textToCopy;
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand('copy');
@@ -847,6 +948,7 @@ Infinity Loans
   const editModalTitle = document.getElementById('editModalTitle');
   const editTitleInput = document.getElementById('editTitleInput');
   const editContentInput = document.getElementById('editContentInput');
+  const editContentInputFr = document.getElementById('editContentInputFr');
 
   function openEditModal(id){
     if(id){
@@ -855,12 +957,14 @@ Infinity Loans
       activeId = id;
       editModalTitle.textContent = 'Edit Script';
       editTitleInput.value = script.title;
-      editContentInput.value = script.content;
+      editContentInput.value = script.content || '';
+      editContentInputFr.value = script.contentFr || '';
     } else {
       activeId = null;
       editModalTitle.textContent = 'Add Script';
       editTitleInput.value = '';
       editContentInput.value = '';
+      editContentInputFr.value = '';
     }
     editOverlay.classList.add('active');
     setTimeout(() => editTitleInput.focus(), 50);
@@ -871,6 +975,7 @@ Infinity Loans
   document.getElementById('saveBtn').addEventListener('click', () => {
     const title = editTitleInput.value.trim();
     const content = editContentInput.value.trim();
+    const contentFr = editContentInputFr.value.trim();
 
     if(!title){
       editTitleInput.focus();
@@ -883,6 +988,7 @@ Infinity Loans
       if(script){
         script.title = title;
         script.content = content;
+        script.contentFr = contentFr;
         saveScripts();
         renderGrid();
         showToast('Script updated');
@@ -892,7 +998,8 @@ Infinity Loans
       const newScript = {
         id: 'script-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
         title: title,
-        content: content
+        content: content,
+        contentFr: contentFr
       };
       scripts.push(newScript);
       saveScripts();
