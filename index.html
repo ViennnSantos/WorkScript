@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIEN Script Toolkit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-avatar">V</div>
+    <div class="brand-text">
+      <div class="brand-name">VIEN Script Toolkit</div>
+      <div class="brand-sub">Personal Collections Workspace</div>
+    </div>
+  </div>
+
+  <div class="nav-group-label">MENU</div>
+  <ul class="nav-list">
+    <li>
+      <button class="nav-item active" data-page="scripts">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Scripts
+      </button>
+    </li>
+    <li>
+      <button class="nav-item" data-page="followup">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Follow-up
+        <span class="nav-badge" id="followupBadge" style="display:none"></span>
+      </button>
+    </li>
+    <li>
+      <button class="nav-item" data-page="settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </li>
+  </ul>
+
+  <div class="nav-group-label" id="catNavLabel" style="display:none">CATEGORIES</div>
+  <ul class="nav-list" id="categoryNav"></ul>
+</nav>
+
+<div class="sidebar-scrim" id="sidebarScrim"></div>
+
+<div class="main-wrap" id="mainWrap">
+
+  <div class="mobile-topbar">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="mobile-brand">VIEN Script Toolkit</span>
+  </div>
+
+  <section class="page active" id="page-scripts">
+    <div class="page-header">
+      <div class="page-header-text">
+        <h2 class="page-title">Scripts</h2>
+        <p class="page-sub">Your call and message templates</p>
+      </div>
+      <div class="page-actions">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search title or content…" autocomplete="off" />
+          <button class="search-clear" id="searchClear" style="display:none" aria-label="Clear search">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <button class="btn btn-primary" id="addScriptBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Script
+        </button>
+      </div>
+    </div>
+    <div id="scriptGrid"></div>
+  </section>
+
+  <section class="page" id="page-followup">
+    <div class="page-header">
+      <div class="page-header-text">
+        <h2 class="page-title">Follow-up Tracker</h2>
+        <p class="page-sub">Daily working list for client follow-ups</p>
+      </div>
+      <div class="page-actions">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="followupSearch" placeholder="Search clients…" autocomplete="off" />
+        </div>
+        <button class="btn btn-primary" id="addFollowupBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Client
+        </button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="crm-table" id="followupTable">
+        <thead>
+          <tr>
+            <th>Client Name</th>
+            <th>Email / Phone</th>
+            <th>Status</th>
+            <th>Next Action</th>
+            <th>Notes</th>
+            <th>Date</th>
+            <th style="width:80px"></th>
+          </tr>
+        </thead>
+        <tbody id="followupBody"></tbody>
+      </table>
+      <div class="table-empty" id="followupEmpty">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <p class="empty-title">No clients yet</p>
+        <p class="empty-sub">Click <strong>Add Client</strong> to start tracking follow-ups.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="page-settings">
+    <div class="page-header">
+      <div class="page-header-text">
+        <h2 class="page-title">Settings</h2>
+        <p class="page-sub">Manage your workspace data and preferences</p>
+      </div>
+    </div>
+    <div class="settings-grid">
+      <div class="settings-card">
+        <div class="settings-card-icon" style="background:#eff6ff;color:#3b82f6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="settings-card-body">
+          <div class="settings-card-title">Export Backup</div>
+          <div class="settings-card-desc">Download all your scripts and follow-ups as a JSON file.</div>
+        </div>
+        <button class="btn btn-secondary" id="exportBtn">Export</button>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-icon" style="background:#ecfdf5;color:#10b981">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="settings-card-body">
+          <div class="settings-card-title">Import Backup</div>
+          <div class="settings-card-desc">Restore from a previously exported JSON backup file.</div>
+        </div>
+        <button class="btn btn-secondary" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" />
+      </div>
+      <div class="settings-card settings-card-danger">
+        <div class="settings-card-icon" style="background:#fef2f2;color:#ef4444">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </div>
+        <div class="settings-card-body">
+          <div class="settings-card-title">Clear All Data</div>
+          <div class="settings-card-desc">Permanently delete all scripts, follow-ups, and favorites. Cannot be undone.</div>
+        </div>
+        <button class="btn btn-danger-outline" id="clearDataBtn">Clear</button>
+      </div>
+      <div class="settings-card settings-info-card">
+        <div class="settings-card-icon" style="background:#f5f3ff;color:#8b5cf6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="settings-card-body">
+          <div class="settings-card-title">Application Info</div>
+          <div class="settings-card-desc">
+            <span class="info-row"><strong>App</strong> VIEN Script Toolkit</span>
+            <span class="info-row"><strong>Version</strong> 3.0</span>
+            <span class="info-row"><strong>Storage</strong> localStorage (browser)</span>
+            <span class="info-row"><strong>Deployment</strong> Vercel Ready (static)</span>
+            <span class="info-row"><strong>Author</strong> Vien</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="app-footer">
+    <span>Personal Collections Workspace by <strong>Vien</strong></span>
+    <span class="footer-sep">•</span>
+    <span>Version 3.0</span>
+    <span class="footer-sep">•</span>
+    <span>Local Storage</span>
+    <span class="footer-sep">•</span>
+    <span>Vercel Ready</span>
+  </footer>
+
+</div>
+
+<div class="overlay" id="viewOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-meta">
+        <span class="modal-cat-badge" id="viewCategoryBadge"></span>
+        <h2 id="viewTitle"></h2>
+      </div>
+      <button class="modal-close" data-close="viewOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="lang-tabs">
+        <button class="lang-tab active" id="viewTabIL">Infinity Loans</button>
+        <button class="lang-tab" id="viewTabIF">Infinity Finance</button>
+      </div>
+      <pre id="viewContent"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger-outline" id="deleteBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Delete
+      </button>
+      <button class="btn btn-secondary" id="editBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="btn btn-primary" id="copyFullBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Script
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="editOverlay">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2 id="editModalTitle">Add Script</h2>
+      <button class="modal-close" data-close="editOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div>
+          <label class="field-label" for="editTitleInput">Title</label>
+          <input type="text" id="editTitleInput" placeholder="e.g. FIRST NSF - INFINITY LOANS" />
+        </div>
+        <div>
+          <label class="field-label" for="editCategorySelect">Category</label>
+          <select id="editCategorySelect"></select>
+        </div>
+      </div>
+      <label class="field-label" for="editContentIL">Script Content (Infinity Loans)</label>
+      <textarea id="editContentIL" placeholder="Enter the Infinity Loans script text…"></textarea>
+      <label class="field-label" for="editContentIF">Script Content (Infinity Finance) — optional</label>
+      <textarea id="editContentIF" placeholder="Enter the Infinity Finance version…" style="min-height:100px"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="editOverlay">Cancel</button>
+      <button class="btn btn-primary" id="saveBtn">Save Script</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="confirmOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Delete script?</h2>
+      <button class="modal-close" data-close="confirmOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-text">This will permanently remove this script. This cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="confirmOverlay">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="followupOverlay">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2 id="followupModalTitle">Add Client</h2>
+      <button class="modal-close" data-close="followupOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div>
+          <label class="field-label" for="fuName">Client Name</label>
+          <input type="text" id="fuName" placeholder="Full name" />
+        </div>
+        <div>
+          <label class="field-label" for="fuContact">Email / Phone</label>
+          <input type="text" id="fuContact" placeholder="email or phone number" />
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label class="field-label" for="fuStatus">Status</label>
+          <select id="fuStatus">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Awaiting Reply">Awaiting Reply</option>
+            <option value="Payment Arranged">Payment Arranged</option>
+            <option value="Settled">Settled</option>
+            <option value="Escalated">Escalated</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="fuDate">Date</label>
+          <input type="date" id="fuDate" />
+        </div>
+      </div>
+      <label class="field-label" for="fuNextAction">Next Action</label>
+      <input type="text" id="fuNextAction" placeholder="e.g. Call back Friday, Send settlement offer" />
+      <label class="field-label" for="fuNotes">Notes</label>
+      <textarea id="fuNotes" placeholder="Any relevant notes…" style="min-height:90px"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="followupOverlay">Cancel</button>
+      <button class="btn btn-primary" id="saveFollowupBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="confirmFollowupOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Remove client?</h2>
+      <button class="modal-close" data-close="confirmFollowupOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-text">This will remove this client from your follow-up list.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="confirmFollowupOverlay">Cancel</button>
+      <button class="btn btn-danger" id="confirmDeleteFollowupBtn">Remove</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="confirmClearOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>Clear Workspace</h2>
+      <button class="modal-close" data-close="confirmClearOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-text">This will permanently remove all scripts, follow-ups, favorites and locally stored data from this device.</p>
+      <p class="confirm-text" style="margin-top:10px;font-weight:600;color:var(--text-mid)">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close="confirmClearOverlay">Cancel</button>
+      <button class="btn btn-danger-outline" id="clearStep1Btn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="confirmClearFinalOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-header" style="border-left:4px solid #dc2626">
+      <h2 style="color:#dc2626">Final Confirmation</h2>
+      <button class="modal-close" data-close="confirmClearFinalOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-text" style="margin-bottom:12px">This is your final confirmation.</p>
+      <p class="confirm-text" style="margin-bottom:10px">Deleting your workspace will permanently erase:</p>
+      <ul class="confirm-list">
+        <li>Scripts</li>
+        <li>Follow-up Tracker</li>
+        <li>Categories</li>
+        <li>Favorites</li>
+      </ul>
+      <p class="confirm-text" style="margin-top:14px;font-weight:600;color:#dc2626">This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="clearGoBackBtn">Go Back</button>
+      <button class="btn btn-danger" id="confirmClearBtn">Yes, Delete Workspace</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
