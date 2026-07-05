@@ -10,6 +10,7 @@ const CATEGORIES = [
   { name: 'CLIENT RESPONSES',    color: '#7c5cbf', bg: '#f6f3ff' },
   { name: 'CALL / SMS',          color: '#3b82f6', bg: '#eff6ff' },
   { name: 'TOOLS',               color: '#64748b', bg: '#f8fafc' },
+  { name: 'NSF PROCESS',         color: '#dc6b2f', bg: '#fff4ee' },
   { name: 'UNCATEGORIZED',       color: '#94a3b8', bg: '#f8fafc' },
 ];
 
@@ -17,12 +18,13 @@ function catCfg(name) {
   return CATEGORIES.find(c => c.name === name) || CATEGORIES[CATEGORIES.length - 1];
 }
 
-let scripts        = [];
-let followups      = [];
-let activeScriptId = null;
-let activeTab      = 'IL';
-let dragSrcId      = null;
+let scripts          = [];
+let followups        = [];
+let activeScriptId   = null;
+let activeTab        = 'IL';
+let dragSrcId        = null;
 let activeFollowupId = null;
+let activeCat        = null;
 
 function loadAll() {
   try { scripts   = JSON.parse(localStorage.getItem(SK_SCRIPTS)  || '[]'); } catch { scripts   = []; }
@@ -32,18 +34,15 @@ function loadAll() {
     if (!s.category)  s.category  = 'UNCATEGORIZED';
     if (!s.createdAt) s.createdAt = Date.now();
     if (s.favorite === undefined) s.favorite = false;
-
     if (s.content !== undefined && s.infinityLoans === undefined) {
       s.infinityLoans   = s.content;
       s.infinityFinance = s.contentFr || '';
-      delete s.content;
-      delete s.contentFr;
+      delete s.content; delete s.contentFr;
     }
     if (s.english !== undefined && s.infinityLoans === undefined) {
       s.infinityLoans   = s.english;
       s.infinityFinance = s.french || '';
-      delete s.english;
-      delete s.french;
+      delete s.english; delete s.french;
     }
     if (s.infinityLoans   === undefined) s.infinityLoans   = '';
     if (s.infinityFinance === undefined) s.infinityFinance = '';
@@ -66,7 +65,13 @@ function navigateTo(page) {
 }
 
 document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-  btn.addEventListener('click', () => navigateTo(btn.dataset.page));
+  btn.addEventListener('click', () => {
+    if (btn.dataset.page === 'scripts') {
+      activeCat = null;
+      clearCatTreeActive();
+    }
+    navigateTo(btn.dataset.page);
+  });
 });
 
 const sidebar = document.getElementById('sidebar');
@@ -135,34 +140,69 @@ function renderScriptGrid() {
   const query = searchInput.value.trim().toLowerCase();
   grid.innerHTML = '';
 
-  if (!scripts.length && !query) {
-    grid.innerHTML = `
-      <div class="scripts-empty">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-        </svg>
-        <p class="empty-title">No scripts yet</p>
-        <p class="empty-sub">Click <strong>Add Script</strong> to create your first template.</p>
-      </div>`;
-    renderCategoryNav();
-    return;
-  }
-
   if (query) {
     renderSearchResults(grid, query);
     return;
   }
 
-  renderFavoritesSection(grid);
-  renderCategoryGroups(grid);
-  renderCategoryNav();
+  if (!scripts.length) {
+    grid.innerHTML = `
+      <div class="scripts-empty">
+        <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <p class="empty-title">No scripts yet</p>
+        <p class="empty-sub">Click <strong>Add Script</strong> to create your first template.</p>
+      </div>`;
+    buildCatTree();
+    return;
+  }
+
+  const favs = scripts.filter(s => s.favorite);
+  if (favs.length) renderFavoritesSection(grid, favs);
+
+  if (!activeCat) {
+    if (!favs.length) {
+      grid.innerHTML = `
+        <div class="scripts-placeholder">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <p class="ph-title">Select a category</p>
+          <p class="ph-sub">Choose a category from the sidebar to view scripts.</p>
+        </div>`;
+      if (favs.length) grid.innerHTML = '';
+    }
+    buildCatTree();
+    return;
+  }
+
+  if (activeCat === '__favorites__') {
+    grid.innerHTML = '';
+    if (favs.length) renderFavoritesSection(grid, favs);
+    else {
+      grid.innerHTML = `
+        <div class="scripts-placeholder">
+          <p class="ph-title">No favorites yet</p>
+          <p class="ph-sub">Star any script to pin it here.</p>
+        </div>`;
+    }
+    buildCatTree();
+    return;
+  }
+
+  grid.innerHTML = '';
+  renderCategorySection(grid, activeCat);
+  buildCatTree();
 }
 
-function renderFavoritesSection(grid) {
-  const favs = scripts.filter(s => s.favorite);
-  if (!favs.length) return;
-
+function renderFavoritesSection(grid, favs) {
   const section = document.createElement('div');
   section.className = 'category-section';
   section.innerHTML = `
@@ -172,51 +212,48 @@ function renderFavoritesSection(grid) {
       <span class="cat-line"></span>
       <span class="cat-count">${favs.length}</span>
     </div>`;
-
   const g = document.createElement('div');
   g.className = 'script-grid';
-  favs.forEach(s => g.appendChild(buildCard(s, false)));
+  favs.forEach(s => g.appendChild(buildCard(s, true)));
   section.appendChild(g);
   grid.appendChild(section);
 }
 
-function renderCategoryGroups(grid) {
-  const groups = {};
-  CATEGORIES.forEach(c => { groups[c.name] = []; });
-  scripts.forEach(s => {
-    const cat = s.category || 'UNCATEGORIZED';
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(s);
-  });
-  CATEGORIES.forEach(c => {
-    groups[c.name].sort((a, b) => {
+function renderCategorySection(grid, catName) {
+  const cfg  = catCfg(catName);
+  const list = scripts
+    .filter(s => s.category === catName)
+    .sort((a, b) => {
       if (a.favorite && !b.favorite) return -1;
       if (!a.favorite && b.favorite) return 1;
       return (a.catOrder || 0) - (b.catOrder || 0);
     });
-  });
 
-  CATEGORIES.forEach(cat => {
-    const list = groups[cat.name];
-    if (!list.length) return;
-    const cfg = catCfg(cat.name);
-    const section = document.createElement('div');
-    section.className = 'category-section';
-    section.dataset.category = cat.name;
-    section.innerHTML = `
-      <div class="cat-header">
-        <span class="cat-stripe" style="background:${cfg.color}"></span>
-        <span class="cat-label">${cat.name}</span>
-        <span class="cat-line"></span>
-        <span class="cat-count">${list.length}</span>
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="scripts-placeholder">
+        <p class="ph-title">No scripts in this category</p>
+        <p class="ph-sub">Click <strong>Add Script</strong> and select <em>${catName}</em>.</p>
       </div>`;
-    const g = document.createElement('div');
-    g.className = 'script-grid';
-    g.dataset.category = cat.name;
-    list.forEach(s => g.appendChild(buildCard(s, false)));
-    section.appendChild(g);
-    grid.appendChild(section);
-  });
+    return;
+  }
+
+  const section = document.createElement('div');
+  section.className = 'category-section';
+  section.dataset.category = catName;
+  section.innerHTML = `
+    <div class="cat-header">
+      <span class="cat-stripe" style="background:${cfg.color}"></span>
+      <span class="cat-label">${catName}</span>
+      <span class="cat-line"></span>
+      <span class="cat-count">${list.length}</span>
+    </div>`;
+  const g = document.createElement('div');
+  g.className = 'script-grid';
+  g.dataset.category = catName;
+  list.forEach(s => g.appendChild(buildCard(s, false)));
+  section.appendChild(g);
+  grid.appendChild(section);
 }
 
 function renderSearchResults(grid, query) {
@@ -245,11 +282,10 @@ function buildCard(script, showCatBadge) {
   card.draggable  = true;
   card.style.borderTopColor = cfg.color;
 
-  const preview = (script.infinityLoans || '').split('\n').find(l => l.trim()) || '';
-
   card.innerHTML = `
     <div class="card-top">
       <span class="card-title">${esc(script.title)}</span>
+      ${script.favorite ? '<span class="card-fav-dot" title="Favorite">⭐</span>' : ''}
       <span class="card-drag-handle" title="Drag to reorder">
         <svg width="9" height="13" viewBox="0 0 9 13" fill="currentColor">
           <circle cx="2" cy="1.5" r="1.5"/><circle cx="7" cy="1.5" r="1.5"/>
@@ -258,8 +294,7 @@ function buildCard(script, showCatBadge) {
         </svg>
       </span>
     </div>
-    ${preview ? `<p class="card-preview">${esc(preview)}</p>` : ''}
-    <span class="card-cat-badge${showCatBadge ? ' always-show' : ''}"
+    <span class="card-cat-badge${showCatBadge ? '' : ' hidden'}"
           style="background:${cfg.bg};color:${cfg.color}">
       <span class="card-cat-dot" style="background:${cfg.color}"></span>
       ${script.category}
@@ -296,6 +331,7 @@ function buildCard(script, showCatBadge) {
     if (s) {
       s.favorite = !s.favorite;
       saveScripts();
+      buildCatTree();
       renderScriptGrid();
       showToast(s.favorite ? '⭐ Added to favorites' : 'Removed from favorites', 'info');
     }
@@ -315,33 +351,117 @@ function buildCard(script, showCatBadge) {
   return card;
 }
 
-function renderCategoryNav() {
-  const nav   = document.getElementById('categoryNav');
-  const label = document.getElementById('catNavLabel');
-  nav.innerHTML = '';
+function buildCatTree() {
+  const container  = document.getElementById('catTreeItems');
+  const favBtn     = document.getElementById('favTreeBtn');
+  const favCount   = document.getElementById('favTreeCount');
+  const favs       = scripts.filter(s => s.favorite);
+
+  favCount.textContent  = favs.length;
+  favCount.style.display = favs.length ? 'inline' : 'none';
+  favBtn.classList.toggle('active', activeCat === '__favorites__');
+
+  container.innerHTML = '';
+
   const usedCats = CATEGORIES.filter(c => scripts.some(s => s.category === c.name));
-  if (!usedCats.length) { label.style.display = 'none'; return; }
-  label.style.display = 'block';
+
   usedCats.forEach(cat => {
     const count = scripts.filter(s => s.category === cat.name).length;
-    const cfg   = catCfg(cat.name);
-    const li    = document.createElement('li');
-    li.innerHTML = `
-      <button class="nav-item">
-        <span class="nav-cat-dot" style="background:${cfg.color}"></span>
-        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cat.name}</span>
-        <span class="nav-cat-count">${count}</span>
-      </button>`;
-    li.querySelector('button').addEventListener('click', () => {
-      navigateTo('scripts');
-      setTimeout(() => {
-        const sec = document.querySelector(`.category-section[data-category="${cat.name}"]`);
-        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 80);
+    const isActive = activeCat === cat.name;
+    const wasOpen  = container.querySelector(`[data-cat="${cat.name}"]`)?.closest('.cat-folder')
+                       ?.querySelector('.cat-folder-children.open');
+
+    const folder = document.createElement('div');
+    folder.className = 'cat-folder';
+
+    const btn = document.createElement('button');
+    btn.className = `cat-folder-btn${isActive ? ' active' : ''}`;
+    btn.dataset.cat = cat.name;
+    btn.innerHTML = `
+      <span class="cat-folder-dot" style="background:${cat.color}"></span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis">${cat.name}</span>
+      <span class="cat-folder-count">${count}</span>
+      <svg class="cat-folder-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+
+    const children = document.createElement('div');
+    children.className = 'cat-folder-children';
+    if (isActive || wasOpen) {
+      children.classList.add('open');
+      btn.classList.add('open');
+    }
+
+    btn.addEventListener('click', () => {
+      const isOpen = children.classList.contains('open');
+      if (isOpen && activeCat === cat.name) {
+        children.classList.remove('open');
+        btn.classList.remove('open');
+        activeCat = null;
+        clearCatTreeActive();
+        updatePageHeader(null);
+        renderScriptGrid();
+      } else {
+        children.classList.add('open');
+        btn.classList.add('open');
+        selectCat(cat.name);
+      }
     });
-    nav.appendChild(li);
+
+    folder.appendChild(btn);
+    folder.appendChild(children);
+    container.appendChild(folder);
   });
 }
+
+function selectCat(catName) {
+  activeCat = catName;
+  clearCatTreeActive();
+
+  if (catName === '__favorites__') {
+    document.getElementById('favTreeBtn').classList.add('active');
+    updatePageHeader('Favorites');
+  } else {
+    const allBtns = document.querySelectorAll('.cat-folder-btn');
+    allBtns.forEach(b => {
+      if (b.dataset.cat === catName) {
+        b.classList.add('active');
+        const children = b.nextElementSibling;
+        if (children) { children.classList.add('open'); b.classList.add('open'); }
+      }
+    });
+    updatePageHeader(catName);
+  }
+
+  navigateTo('scripts');
+}
+
+function clearCatTreeActive() {
+  document.querySelectorAll('.cat-folder-btn.active').forEach(b => b.classList.remove('active'));
+  document.getElementById('favTreeBtn').classList.remove('active');
+}
+
+function updatePageHeader(catName) {
+  const title = document.getElementById('scriptsPageTitle');
+  const sub   = document.getElementById('scriptsPageSub');
+  if (!catName) {
+    title.textContent = 'Scripts';
+    sub.textContent   = 'Your call and message templates';
+  } else if (catName === 'Favorites') {
+    title.textContent = '⭐ Favorites';
+    sub.textContent   = 'Your pinned scripts';
+  } else {
+    const cfg = catCfg(catName);
+    title.textContent = catName;
+    sub.textContent   = `${scripts.filter(s => s.category === catName).length} scripts`;
+    title.style.color = cfg.color;
+  }
+  if (catName && catName !== 'Favorites') {
+    setTimeout(() => { title.style.color = ''; }, 0);
+  }
+}
+
+document.getElementById('favTreeBtn').addEventListener('click', () => {
+  selectCat('__favorites__');
+});
 
 function openViewModal(id) {
   const s = scripts.find(x => x.id === id);
@@ -399,6 +519,7 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
   if (activeScriptId) {
     scripts = scripts.filter(s => s.id !== activeScriptId);
     saveScripts();
+    buildCatTree();
     renderScriptGrid();
     showToast('Script deleted', 'info');
   }
@@ -421,16 +542,16 @@ function openEditModal(id) {
   document.getElementById('editTitleInput').value       = s ? s.title            : '';
   document.getElementById('editContentIL').value        = s ? (s.infinityLoans   || '') : '';
   document.getElementById('editContentIF').value        = s ? (s.infinityFinance || '') : '';
-  populateCategorySelect(s ? s.category : 'UNCATEGORIZED');
+  populateCategorySelect(s ? s.category : (activeCat && activeCat !== '__favorites__' ? activeCat : 'UNCATEGORIZED'));
   openOverlay('editOverlay');
   setTimeout(() => document.getElementById('editTitleInput').focus(), 60);
 }
 
 document.getElementById('saveBtn').addEventListener('click', () => {
-  const title          = document.getElementById('editTitleInput').value.trim();
-  const category       = document.getElementById('editCategorySelect').value;
-  const infinityLoans  = document.getElementById('editContentIL').value.trim();
-  const infinityFinance= document.getElementById('editContentIF').value.trim();
+  const title           = document.getElementById('editTitleInput').value.trim();
+  const category        = document.getElementById('editCategorySelect').value;
+  const infinityLoans   = document.getElementById('editContentIL').value.trim();
+  const infinityFinance = document.getElementById('editContentIF').value.trim();
 
   if (!title) { document.getElementById('editTitleInput').focus(); return; }
 
@@ -440,11 +561,11 @@ document.getElementById('saveBtn').addEventListener('click', () => {
     showToast('Script updated', 'success');
   } else {
     scripts.push({
-      id:             'sc-' + Date.now() + '-' + Math.floor(Math.random() * 9999),
+      id:            'sc-' + Date.now() + '-' + Math.floor(Math.random() * 9999),
       title, category, infinityLoans, infinityFinance,
-      favorite:       false,
-      catOrder:       scripts.filter(s => s.category === category).length,
-      createdAt:      Date.now(),
+      favorite:      false,
+      catOrder:      scripts.filter(s => s.category === category).length,
+      createdAt:     Date.now(),
     });
     showToast('Script saved', 'success');
   }
@@ -452,6 +573,7 @@ document.getElementById('saveBtn').addEventListener('click', () => {
   saveScripts();
   closeOverlay('editOverlay');
   activeScriptId = null;
+  buildCatTree();
   renderScriptGrid();
 });
 
@@ -597,16 +719,11 @@ document.getElementById('confirmDeleteFollowupBtn').addEventListener('click', ()
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const data = {
-    version:    3,
-    exportedAt: new Date().toISOString(),
-    scripts,
-    followups,
-  };
+  const data = { version: 3, exportedAt: new Date().toISOString(), scripts, followups };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href     = url;
+  a.href = url;
   a.download = `vien-workspace-backup-${todayStr()}.json`;
   a.click();
   URL.revokeObjectURL(url);
@@ -627,16 +744,12 @@ document.getElementById('importFile').addEventListener('change', e => {
       if (data.scripts) {
         scripts = data.scripts.map(s => {
           if (s.content !== undefined && s.infinityLoans === undefined) {
-            s.infinityLoans   = s.content;
-            s.infinityFinance = s.contentFr || '';
-            delete s.content;
-            delete s.contentFr;
+            s.infinityLoans = s.content; s.infinityFinance = s.contentFr || '';
+            delete s.content; delete s.contentFr;
           }
           if (s.english !== undefined && s.infinityLoans === undefined) {
-            s.infinityLoans   = s.english;
-            s.infinityFinance = s.french || '';
-            delete s.english;
-            delete s.french;
+            s.infinityLoans = s.english; s.infinityFinance = s.french || '';
+            delete s.english; delete s.french;
           }
           if (!s.infinityLoans)   s.infinityLoans   = '';
           if (!s.infinityFinance) s.infinityFinance = '';
@@ -647,8 +760,8 @@ document.getElementById('importFile').addEventListener('change', e => {
         saveScripts();
       }
       if (data.followups) { followups = data.followups; saveFollowups(); }
+      buildCatTree();
       renderScriptGrid();
-      renderCategoryNav();
       showToast('Backup imported successfully', 'success');
     } catch {
       showToast('Import failed — invalid file', 'warn');
@@ -671,13 +784,12 @@ document.getElementById('clearGoBackBtn').addEventListener('click', () => {
 });
 
 document.getElementById('confirmClearBtn').addEventListener('click', () => {
-  scripts   = [];
-  followups = [];
-  saveScripts();
-  saveFollowups();
+  scripts = []; followups = [];
+  saveScripts(); saveFollowups();
+  activeCat = null;
   closeOverlay('confirmClearFinalOverlay');
+  buildCatTree();
   renderScriptGrid();
-  renderCategoryNav();
   showToast('Workspace cleared', 'info');
 });
 
@@ -694,8 +806,7 @@ function copyFallback(text) {
   ta.value = text;
   ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
   document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
+  ta.focus(); ta.select();
   try { document.execCommand('copy'); } catch {}
   document.body.removeChild(ta);
 }
@@ -705,5 +816,5 @@ function todayStr() {
 }
 
 loadAll();
+buildCatTree();
 navigateTo('scripts');
-renderCategoryNav();
